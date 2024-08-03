@@ -13,13 +13,7 @@ pub fn tokenize(
     [h, ..t] ->
       case int.parse(h) {
         Ok(_) -> {
-          tokenize(
-            t,
-            list.append(token_list, [
-              types.Token(types.Digit, string.append(curr_number, h)),
-            ]),
-            string.append(curr_number, h),
-          )
+          tokenize(t, token_list, string.append(curr_number, h))
         }
         Error(_) -> {
           case list.contains(["+", "-", "*", "/"], h) {
@@ -35,7 +29,10 @@ pub fn tokenize(
                 _ -> {
                   tokenize(
                     t,
-                    list.append(token_list, [types.Token(types.Operator, h)]),
+                    list.append(token_list, [
+                      types.Token(types.Digit, curr_number),
+                      types.Token(types.Operator, h),
+                    ]),
                     "",
                   )
                 }
@@ -46,8 +43,13 @@ pub fn tokenize(
         }
       }
     [] -> {
-      io.debug(token_list)
-      token_list
+      case string.length(curr_number) {
+        0 -> token_list
+        _ -> {
+          list.append(token_list, [types.Token(types.Digit, curr_number)])
+          |> io.debug
+        }
+      }
     }
   }
 }
