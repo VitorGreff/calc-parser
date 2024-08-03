@@ -1,4 +1,5 @@
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/string
 import types/types
@@ -44,6 +45,9 @@ pub fn tokenize(
           }
         }
       }
-    [] -> token_list
+    [] -> {
+      io.debug(token_list)
+      token_list
+    }
   }
 }
