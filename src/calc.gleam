@@ -5,11 +5,10 @@ import gleam/string
 import lexer/lexer
 
 pub fn main() {
-  let expression =
-    argv.load().arguments
-    |> io.debug()
-  let assert Ok(first) = list.first(expression)
-  io.debug(first)
-  lexer.tokenize(string.split(first, ""), [], "")
-  |> io.debug()
+  let expressions = argv.load().arguments
+  list.each(expressions, fn(expression) {
+    string.split(expression, "")
+    |> lexer.tokenize([], "")
+    |> io.debug
+  })
 }
