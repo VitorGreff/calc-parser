@@ -44,7 +44,14 @@ pub fn tokenize(
       }
     [] -> {
       case string.length(curr_number) {
-        0 -> token_list
+        0 -> {
+          let assert Ok(last) = list.last(token_list)
+          case last {
+            types.Token(types.Digit, _) -> token_list
+            types.Token(types.Operator, _) ->
+              panic as "expression ended with an operator"
+          }
+        }
         _ -> {
           list.append(token_list, [types.Token(types.Digit, curr_number)])
           |> io.debug

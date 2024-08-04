@@ -18,7 +18,7 @@ pub fn parse(
           let aux = parse_binary_expression(op, digit, value)
           parse(t, "", int.to_string(aux), aux)
         }
-        types.Token(types.Operator, _op), _, "" ->
+        types.Token(types.Operator, _op), _op, "" ->
           panic as "invalid expression -> operator without left digit"
         types.Token(types.Operator, op), "", digit ->
           parse(t, op, digit, result)
