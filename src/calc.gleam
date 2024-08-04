@@ -10,7 +10,7 @@ pub fn main() {
   list.each(expressions, fn(expression) {
     string.split(expression, "")
     |> lexer.tokenize([], "")
-    // |> parser.parse("", "")
-    // |> io.debug
+    |> parser.parse("", "", 0)
+    |> io.debug
   })
 }
