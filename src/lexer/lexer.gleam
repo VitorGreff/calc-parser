@@ -1,62 +1,34 @@
-import gleam/int
 import gleam/io
-import gleam/list
 import gleam/string
-import types/types
 
-pub fn tokenize(
-  exp: List(String),
-  token_list: List(types.Token),
-  curr_number: String,
-) -> List(types.Token) {
-  case exp {
-    [h, ..t] ->
-      case int.parse(h) {
-        Ok(_) -> {
-          tokenize(t, token_list, string.append(curr_number, h))
-        }
-        Error(_) -> {
-          case list.contains(["+", "-", "*", "/"], h) {
-            True -> {
-              case string.length(curr_number) {
-                0 -> {
-                  tokenize(
-                    t,
-                    list.append(token_list, [types.Token(types.Operator, h)]),
-                    curr_number,
-                  )
-                }
-                _ -> {
-                  tokenize(
-                    t,
-                    list.append(token_list, [
-                      types.Token(types.Digit, curr_number),
-                      types.Token(types.Operator, h),
-                    ]),
-                    "",
-                  )
-                }
-              }
-            }
-            False -> panic as "invalid character was passed as an argument"
-          }
-        }
-      }
-    [] -> {
-      case string.length(curr_number) {
-        0 -> {
-          let assert Ok(last) = list.last(token_list)
-          case last {
-            types.Token(types.Digit, _) -> token_list
-            types.Token(types.Operator, _) ->
-              panic as "expression ended with an operator"
-          }
-        }
-        _ -> {
-          list.append(token_list, [types.Token(types.Digit, curr_number)])
-          |> io.debug
-        }
-      }
-    }
+type Token {
+  Operator(String)
+  Digit(Float)
+}
+
+fn is_operator(char: String) {
+  case char {
+    "-" | "+" | "*" | "/" | "^" -> True
+    _ -> False
+  }
+}
+
+// True if so
+fn check_consecutive_operators(
+  token_list: List(String),
+  past_was_operator: Bool,
+) -> Bool {
+  case token_list, past_was_operator {
+    [h, ..], True -> h == "-" || h == "+" || h == "*" || h == "/" || h == "^"
+    [h, ..t], False -> check_consecutive_operators(t, is_operator(h))
+    [], _ -> False
+  }
+}
+
+pub fn run_lexer(tokens_str: String) {
+  let token_list = string.split(tokens_str, on: " ")
+  case check_consecutive_operators(token_list, False) {
+    True -> io.println_error("No support for consecutive operators")
+    False -> todo
   }
 }
