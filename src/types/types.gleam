@@ -1,8 +1,10 @@
 pub type Token {
-  Token(token_type: TokenType, value: String)
+  Operator(String)
+  Digit(Float)
 }
 
-pub type TokenType {
-  Digit
-  Operator
+pub type Precedence {
+  Low
+  Medium
+  High
 }

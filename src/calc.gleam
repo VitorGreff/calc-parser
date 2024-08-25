@@ -6,11 +6,12 @@ import lexer/lexer
 import parser/parser
 
 pub fn main() {
-  let expressions = argv.load().arguments
-  list.each(expressions, fn(expression) {
-    string.split(expression, "")
-    |> lexer.tokenize([], "")
-    |> parser.parse("", "", 0)
-    |> io.debug
-  })
+  todo
+  // let expressions = argv.load().arguments
+  // list.each(expressions, fn(expression) {
+  //   string.split(expression, "")
+  //   |> lexer.tokenize([], "")
+  //   |> parser.parse("", "", 0)
+  //   |> io.debug
+  // })
 }
