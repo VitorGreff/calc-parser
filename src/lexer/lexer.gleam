@@ -1,5 +1,4 @@
 import gleam/float
-import gleam/io
 import gleam/list
 import gleam/string
 import types/types.{
@@ -11,18 +10,20 @@ fn precedence(operator: String) -> Precedence {
     "^" -> High
     "*" | "/" -> Medium
     "+" | "-" -> Low
-    _ -> panic as "Invalid Operator"
+    _ -> {
+      panic as "Invalid Operator"
+    }
   }
 }
 
-// a <= b ?
-fn compare_precedence(a: String, b: String) {
+fn compare_precedence(a: String, b: String) -> Bool {
   case precedence(a), precedence(b) {
-    High, _ -> True
-    Medium, Medium -> True
+    High, _ -> False
+    Medium, High -> True
+    Medium, Medium -> False
     Medium, Low -> False
-    Low, Low -> True
-    _, _ -> False
+    Low, Low -> False
+    Low, _ -> True
   }
 }
 
@@ -59,13 +60,16 @@ fn handle_operator(
         ")" -> #(list.append([operator], ["(", ..stack]), exp_output)
         _ -> {
           case compare_precedence(operator, top) {
-            False -> #(list.append([operator], stack), exp_output)
-            True ->
+            True -> {
               handle_operator(
                 operator,
                 list.drop(stack, 1),
                 list.append(exp_output, [Operator(top)]),
               )
+            }
+            False -> {
+              #(list.append([operator], stack), exp_output)
+            }
           }
         }
       }
@@ -105,13 +109,45 @@ fn shunting_yard(
   exp_output: List(Token),
 ) {
   case token_list {
-    [] -> todo
+    [] -> {
+      case stack {
+        [] -> exp_output
+        [h, _t] if h == "(" || h == ")" -> {
+          panic as "Invalid Expression"
+        }
+        [h, ..t] -> {
+          case is_operator(h) {
+            True ->
+              shunting_yard(
+                token_list,
+                t,
+                list.append(exp_output, [Operator(h)]),
+              )
+            False -> {
+              let assert Ok(value) = float.parse(h)
+              shunting_yard(
+                token_list,
+                t,
+                list.append(exp_output, [Digit(value)]),
+              )
+            }
+          }
+        }
+      }
+    }
     [h, ..t] ->
       case float.parse(h) {
         Ok(f) -> shunting_yard(t, stack, list.append(exp_output, [Digit(f)]))
         Error(_) ->
           case h {
-            _ -> todo
+            "(" | ")" -> {
+              let aux = handle_parens(h, stack, exp_output)
+              shunting_yard(t, aux.0, aux.1)
+            }
+            _ -> {
+              let aux = handle_operator(h, stack, exp_output)
+              shunting_yard(t, aux.0, aux.1)
+            }
           }
       }
   }
@@ -120,7 +156,7 @@ fn shunting_yard(
 pub fn run_lexer(tokens_str: String) {
   let token_list = string.split(tokens_str, on: " ")
   case check_consecutive_operators(token_list, False) {
-    True -> io.println_error("No support for consecutive operators")
-    False -> todo
+    True -> panic as "No support for consecutive operators"
+    False -> shunting_yard(token_list, [], [])
   }
 }
