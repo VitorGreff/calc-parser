@@ -11,7 +11,8 @@ fn evaluate(tokens: List(Token), stack: List(Float)) -> Float {
     [] ->
       case stack {
         [result] -> result
-        _ -> panic as "Invalid expression"
+        _ ->
+          panic as "Invalid expression: Expected a single result on the stack"
       }
     [Digit(d), ..rest] -> evaluate(rest, [d, ..stack])
     [Operator(op), ..rest] -> {
@@ -20,7 +21,8 @@ fn evaluate(tokens: List(Token), stack: List(Float)) -> Float {
           let result = apply_operator(op, left, right)
           evaluate(rest, [result, ..remaining_stack])
         }
-        _ -> panic as "Not enough operands for operator"
+        _ ->
+          panic as "Not enough operands for operator: Expected at least two values on the stack"
       }
     }
   }
@@ -40,8 +42,8 @@ fn apply_operator(op: String, a: Float, b: Float) -> Float {
       result
     }
     _ -> {
-      io.debug(op)
-      panic as "Unknown operator"
+      let pc = "Unknown operator: " <> op
+      panic as pc
     }
   }
 }

@@ -11,7 +11,8 @@ fn precedence(operator: String) -> Precedence {
     "*" | "/" -> Medium
     "+" | "-" -> Low
     _ -> {
-      panic as "Invalid Operator"
+      let pc = "Invalid Operator: " <> operator
+      panic as pc
     }
   }
 }
@@ -88,7 +89,7 @@ fn handle_parens(paren: String, stack: List(String), exp_output: List(Token)) {
               handle_parens(paren, t, list.append(exp_output, [Digit(value)]))
             }
           }
-        [] -> panic as "Invalid Expression"
+        [] -> panic as "Invalid Expression: Mismatched parentheses"
       }
     _ -> panic as "Invalid Expression"
   }
@@ -104,7 +105,7 @@ fn shunting_yard(
       case stack {
         [] -> exp_output
         [h, _t] if h == "(" || h == ")" -> {
-          panic as "Invalid Expression"
+          panic as "Invalid Expression: Unmatched parentheses remaining"
         }
         [h, ..t] -> {
           case is_operator(h) {
