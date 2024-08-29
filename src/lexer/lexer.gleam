@@ -52,25 +52,20 @@ fn handle_operator(
   exp_output: List(Token),
 ) {
   case stack {
-    [] -> #(list.append([operator], stack), exp_output)
-    _ -> {
-      let assert Ok(top) = list.first(stack)
-      case top {
-        "(" -> #(list.append([operator], stack), exp_output)
-        ")" -> #(list.append([operator], ["(", ..stack]), exp_output)
-        _ -> {
-          case compare_precedence(operator, top) {
-            True -> {
-              handle_operator(
-                operator,
-                list.drop(stack, 1),
-                list.append(exp_output, [Operator(top)]),
-              )
-            }
-            False -> {
-              #(list.append([operator], stack), exp_output)
-            }
-          }
+    [] -> #([operator], exp_output)
+    ["(", ..rest] -> #([operator, "(", ..rest], exp_output)
+    [")", ..rest] -> #([operator, "(", ")", ..rest], exp_output)
+    [top, ..rest] -> {
+      case compare_precedence(operator, top) {
+        True -> {
+          handle_operator(
+            operator,
+            rest,
+            list.append(exp_output, [Operator(top)]),
+          )
+        }
+        False -> {
+          #([operator, top, ..rest], exp_output)
         }
       }
     }
@@ -86,13 +81,9 @@ fn handle_parens(paren: String, stack: List(String), exp_output: List(Token)) {
         [h, ..t] ->
           case is_operator(h) {
             True ->
-              handle_parens(
-                paren,
-                t,
-                list.append(exp_output, [Operator(paren)]),
-              )
+              handle_parens(paren, t, list.append(exp_output, [Operator(h)]))
             False -> {
-              // not a paranthesis, not an operator
+              // not a parenthesis, not an operator
               let assert Ok(value) = float.parse(h)
               handle_parens(paren, t, list.append(exp_output, [Digit(value)]))
             }
